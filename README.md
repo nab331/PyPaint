@@ -1,8 +1,15 @@
 # PyPaint
-PyPaint is a High School GUI project in python using the Pygame module.
 
-# Instructions
+A Paint tool made using Python Pygame.
 
-1.Install the pygame module
+![alt text](pypaint.png)
 
-2.Run Paint.py
+# To run
+
+`python Paint.py`
+
+# Requires
+
+1. Python
+2. Pygame
+ (`sudo apt-get install python-pygame`)
