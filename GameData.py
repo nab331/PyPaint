@@ -13,7 +13,6 @@ window = pygame.display.set_mode(window_size)#, pygame.NOFRAME )
 pygame.display.set_caption("Project MAN")
 
 clock = pygame.time.Clock()
-FPS = 60
+FPS = 1000
 
 font = pygame.font.SysFont( "Century Gothic" , 25 )
-
