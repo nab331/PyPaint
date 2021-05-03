@@ -6,7 +6,7 @@ A Paint tool made using Python Pygame.
 
 # To run
 
-`python Paint.py`
+`python StartPainter.py`
 
 # Requires
 
