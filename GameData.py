@@ -41,3 +41,5 @@ class BaseGame:
         self.infobox_h = 50
         self.infobox_x = 2 * self.border_width
         self.infobox_y = self.window_height - 2 * self.border_width - self.infobox_h
+
+        return

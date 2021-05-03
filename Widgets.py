@@ -23,17 +23,21 @@ class Output:
         self.info_box = pygame.Surface((self.base.infobox_w, self.base.infobox_h))
         self.set_alpha(self.info_box, self.ialpha)
         self.info_box.fill(self.bg_color)
+        return
 
     def blit_canvas(self):
         self.base.window.blit(self.canvas, (self.base.canvas_x, self.base.canvas_y))
+        return
 
     def clear_canvas(self):
         self.canvas.fill(self.canvas_color)
+        return
 
     def blit_background(self):
         self.base.window.fill(self.bg_color)
         self.clear_canvas()
         self.blit_canvas()
+        return
 
     def blit_menu(self):
         self.base.window.blit(self.menu_box_bg, (self.base.toolbar_x, self.base.toolbar_y))
@@ -42,9 +46,11 @@ class Output:
         self.base.window.blit(self.info_box, (self.base.infobox_x, self.base.infobox_y))
 
         self.info_box.fill(self.bg_color)
+        return
 
     def set_alpha(self, rectangle, alpha_val=100):
         rectangle.set_alpha(alpha_val)
+        return
 
 
 class PaintData:
@@ -55,9 +61,11 @@ class PaintData:
         self.prime_color = Colors.red
         self.color = None
         self.set_color()
+        return
 
     def set_color(self):
         self.color = tupadd(self.prime_color, int(self.b_darkness))
+        return
 
 
 class Painting:  # THE OUTPUT
@@ -72,10 +80,26 @@ class Painting:  # THE OUTPUT
 
         self.undo_mode = False
 
+        self.drawing = False
+        self.last_mouse_pos = None
+
         self.mouse = None
         self.clicked = None
+        return
 
-    def get_position(self):
+    def insert_draw_list(self, mouse_pos, color, b_size):
+        ret = []
+        if self.drawing and self.last_mouse_pos is not None:
+            while mouse_pos_distance(mouse_pos, self.last_mouse_pos) >= b_size:
+                self.last_mouse_pos = forward_a_step(self.last_mouse_pos, mouse_pos, b_size * 0.5)
+                ret.append([self.last_mouse_pos, color, b_size])
+            ret.append([mouse_pos, color, b_size])
+        else:
+            ret.append([mouse_pos, color, b_size])
+        self.last_mouse_pos = mouse_pos
+        return ret
+
+    def mouse_actions(self):
         self.mouse = pygame.mouse.get_pos()
         self.clicked = pygame.mouse.get_pressed()
         if self.clicked == (1, 0, 0):
@@ -83,14 +107,20 @@ class Painting:  # THE OUTPUT
             canvas_x_max = self.output.base.canvas_x + self.output.base.canvas_w
             canvas_y_min = self.output.base.canvas_y
             canvas_y_max = self.output.base.canvas_y + self.output.base.canvas_h
-            if canvas_x_min < [self.mouse][0][0] < canvas_x_max \
-                    and canvas_y_min < [self.mouse][0][1] < canvas_y_max:  # Inside the canvas
-                mouseCOD = [self.mouse]
-                self.draw_list.append([self.mouse, self.paint_data.color, int(self.paint_data.b_size)])
-                self.blit(mouseCOD)
+            if canvas_x_min < self.mouse[0] < canvas_x_max \
+                    and canvas_y_min < self.mouse[1] < canvas_y_max:  # Inside the canvas
+                point_list = self.insert_draw_list(self.mouse, self.paint_data.color, int(self.paint_data.b_size))
+                self.blit_list(point_list)
+                self.draw_list.extend(point_list)
+                self.drawing = True
+            else:
+                self.drawing = False
+        else:
+            self.drawing = False
 
         if self.undo_mode:
             self.undo()
+        return
 
     def perform_functions(self):
         self.blit_default()
@@ -130,6 +160,7 @@ class Painting:  # THE OUTPUT
                     self.output.clear_canvas()
                     self.output.blit_canvas()
                     self.draw_list = []
+        return
 
     def blit_default(self):  # Blitting stuff like brushsize
         message_to_screen(self.output.base.window, "Shade : " + str(int(self.paint_data.b_darkness * -1)),
@@ -141,11 +172,21 @@ class Painting:  # THE OUTPUT
                            int(self.paint_data.b_size) + 2)  # Outline
         pygame.draw.circle(self.output.base.window, self.paint_data.color, (135, 630),
                            int(self.paint_data.b_size))  # How the brushlooks
+        return
+
+    def blit_list(self, points):
+        for point in points:
+            cood = point[0]
+            canvas_cood = (cood[0] - self.output.base.canvas_x, cood[1] - self.output.base.canvas_y)
+            pygame.draw.circle(self.output.canvas, self.paint_data.color, canvas_cood, int(self.paint_data.b_size))
+        self.output.blit_canvas()
+        return
 
     def blit(self, cood):
-        canvas_cood = (cood[0][0] - self.output.base.canvas_x, cood[0][1] - self.output.base.canvas_y)
+        canvas_cood = (cood[0] - self.output.base.canvas_x, cood[1] - self.output.base.canvas_y)
         pygame.draw.circle(self.output.canvas, self.paint_data.color, canvas_cood, int(self.paint_data.b_size))
         self.output.blit_canvas()
+        return
 
     def undo(self):
         if len(self.draw_list) > 0:
@@ -153,11 +194,13 @@ class Painting:  # THE OUTPUT
 
         self.output.clear_canvas()
 
-        for i in self.draw_list:
-            canvas_cood = (i[0][0] - self.output.base.canvas_x, i[0][1] - self.output.base.canvas_y)
-            pygame.draw.circle(self.output.canvas, i[1], canvas_cood, i[2])
+        for point in self.draw_list:
+            mouse_pos = point[0]
+            canvas_cood = (mouse_pos[0] - self.output.base.canvas_x, mouse_pos[1] - self.output.base.canvas_y)
+            pygame.draw.circle(self.output.canvas, point[1], canvas_cood, point[2])
 
         self.output.blit_canvas()
+        return
 
     def clean_list(self):
         self.cleaned_list = []
@@ -169,6 +212,7 @@ class Painting:  # THE OUTPUT
 
         print(len(self.draw_list))
         print(len(self.cleaned_list))
+        return
 
 
 class MyButton:
@@ -196,6 +240,7 @@ class MyButton:
 
         self.mouse = None
         self.clicked = None
+        return
 
     def display_button(self):
         self.mouse = pygame.mouse.get_pos()
@@ -224,6 +269,7 @@ class MyButton:
             self.output.base.window.blit(self.image, (self.rect.x, self.rect.y))  # Display the icon
 
             self.output.set_alpha(self.output.info_box, self.output.ialpha)  # makes the info box to the original color
+        return
 
 
 class ColorButton:  # Buttons
@@ -247,6 +293,7 @@ class ColorButton:  # Buttons
 
         self.mouse = None
         self.clicked = None
+        return
 
     def display_color(self):
         self.mouse = pygame.mouse.get_pos()
@@ -280,3 +327,4 @@ class ColorButton:  # Buttons
             self.box.fill(self.color)
 
             self.output.base.window.blit(self.box, (self.rect.x, self.rect.y))  # Display the icon
+        return

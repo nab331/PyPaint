@@ -9,6 +9,7 @@ def display_list(output, painting):
     # Draw
     for i in painting.cleaned_list:
         pygame.draw.circle(output.base.window, i[1], i[0], i[2])
+    return
 
 
 def paint_loop(output, painting, buttons, color_buttons):
@@ -46,9 +47,7 @@ def paint_loop(output, painting, buttons, color_buttons):
 
         # Update Function
         painting.perform_functions()
-        painting.get_position()
-
-        # Logic Testing
+        painting.mouse_actions()
 
         # Delay framerate
         output.base.clock.tick(output.base.FPS)
