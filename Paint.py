@@ -3,7 +3,7 @@ from Widgets import *
 
 def display_list(output, painting):
     print("Executed")
-    # clear Screen
+    # Clear Screen
     output.blit_background()
 
     # Draw
@@ -36,8 +36,6 @@ def paint_loop(output, painting, buttons, color_buttons):
                     painting.undo_mode = False
 
         # Draw Everything
-
-        # output.blitBackground()
         output.blit_menu()
 
         for button in buttons:

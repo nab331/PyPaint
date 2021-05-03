@@ -24,9 +24,16 @@ class Output:
         self.set_alpha(self.info_box, self.ialpha)
         self.info_box.fill(self.bg_color)
 
+    def blit_canvas(self):
+        self.base.window.blit(self.canvas, (self.base.canvas_x, self.base.canvas_y))
+
+    def clear_canvas(self):
+        self.canvas.fill(self.canvas_color)
+
     def blit_background(self):
         self.base.window.fill(self.bg_color)
-        self.base.window.blit(self.canvas, (self.base.canvas_x, self.base.canvas_y))
+        self.clear_canvas()
+        self.blit_canvas()
 
     def blit_menu(self):
         self.base.window.blit(self.menu_box_bg, (self.base.toolbar_x, self.base.toolbar_y))
@@ -72,10 +79,12 @@ class Painting:  # THE OUTPUT
         self.mouse = pygame.mouse.get_pos()
         self.clicked = pygame.mouse.get_pressed()
         if self.clicked == (1, 0, 0):
-            # print str(self.mouse[0]) , " , "+str(self.mouse[1])
-
-            # if 290 < [self.mouse][0][0] < 967 and 25 < [self.mouse][0][1] < 763:  # Inisde the border
-            if 290 < [self.mouse][0][0] < 867 and 25 < [self.mouse][0][1] < 663:  # Inisde the border
+            canvas_x_min = self.output.base.canvas_x
+            canvas_x_max = self.output.base.canvas_x + self.output.base.canvas_w
+            canvas_y_min = self.output.base.canvas_y
+            canvas_y_max = self.output.base.canvas_y + self.output.base.canvas_h
+            if canvas_x_min < [self.mouse][0][0] < canvas_x_max \
+                    and canvas_y_min < [self.mouse][0][1] < canvas_y_max:  # Inside the canvas
                 mouseCOD = [self.mouse]
                 self.draw_list.append([self.mouse, self.paint_data.color, int(self.paint_data.b_size)])
                 self.blit(mouseCOD)
@@ -118,7 +127,8 @@ class Painting:  # THE OUTPUT
 
                 elif self.selected.name == 'Clear':
                     self.paint_data.b_size = 10
-                    self.output.blit_background()
+                    self.output.clear_canvas()
+                    self.output.blit_canvas()
                     self.draw_list = []
 
     def blit_default(self):  # Blitting stuff like brushsize
@@ -133,17 +143,21 @@ class Painting:  # THE OUTPUT
                            int(self.paint_data.b_size))  # How the brushlooks
 
     def blit(self, cood):
-        pygame.draw.circle(self.output.base.window, self.paint_data.color, cood[0], int(self.paint_data.b_size))
+        canvas_cood = (cood[0][0] - self.output.base.canvas_x, cood[0][1] - self.output.base.canvas_y)
+        pygame.draw.circle(self.output.canvas, self.paint_data.color, canvas_cood, int(self.paint_data.b_size))
+        self.output.blit_canvas()
 
     def undo(self):
         if len(self.draw_list) > 0:
             self.draw_list.pop()
 
-        self.output.blitBackground()
-        self.output.blitMenu()
+        self.output.clear_canvas()
 
         for i in self.draw_list:
-            pygame.draw.circle(self.output.base.window, i[1], i[0], i[2])
+            canvas_cood = (i[0][0] - self.output.base.canvas_x, i[0][1] - self.output.base.canvas_y)
+            pygame.draw.circle(self.output.canvas, i[1], canvas_cood, i[2])
+
+        self.output.blit_canvas()
 
     def clean_list(self):
         self.cleaned_list = []
