@@ -1,0 +1,58 @@
+import os
+from Widgets import *
+from Paint import *
+
+
+def main():
+    base = BaseGame()
+    output = Output(base, Colors.white, (24, 39, 53), Colors.coolblue)  # The Background
+    paint_data = PaintData()
+    painting = Painting(output, paint_data)
+
+    brush = MyButton(output, paint_data, os.path.join("Resources", "brush.png"), 25, 33, 100, 120, 'Brush',
+                     ['*PAINT COLORS*', ' ', 'Current Size : '], Colors.coolred)
+    pencil = MyButton(output, paint_data, os.path.join("Resources", "color_pencil.png"), 130, 39, 100, 120, 'Pencil',
+                      ['*DRAW*', ' ', 'Current Size : '], Colors.carrot)
+    eraser = MyButton(output, paint_data, os.path.join("Resources", "eraser.png"), 30, 176, 100, 120, 'Eraser',
+                      ['*CLEARS SELECTED*', ' ', 'Current Size : '], Colors.coolblue)
+    rbin = MyButton(output, paint_data, os.path.join("Resources", "bin.png"), 135, 176, 100, 120, 'Clear',
+                    ['*CLEARS ALL*', ' ', 'Current Size : '], Colors.cloud)
+    bplus = MyButton(output, paint_data, os.path.join("Resources", "plus.png"), 31, 510, 35, 45, 'Brush Size +',
+                     ['**INCREASE SIZE**', 'Current Size : '], Colors.coolred)
+    bminus = MyButton(output, paint_data, os.path.join("Resources", "minus.png"), 200, 510, 35, 50, 'Brush Size -',
+                      ['**DECREASE SIZE**', 'Current Size : '], Colors.coolblue)
+    cplus = MyButton(output, paint_data, os.path.join("Resources", "plus.png"), 31, 450, 35, 45, 'Darken Brush',
+                     ['**INCREASE SIZE**', 'Current Size : '], Colors.coolred)
+    cminus = MyButton(output, paint_data, os.path.join("Resources", "minus.png"), 200, 450, 35, 50, 'Lighten Brush',
+                      ['**DECREASE SIZE**', 'Current Size : '], Colors.coolblue)
+
+    buttons = [brush, pencil, eraser, rbin,
+               bplus, bminus, cplus, cminus]
+
+    black_b = ColorButton(output, paint_data, Colors.black, 150, 330, 40, 50, 'Black')
+    white_b = ColorButton(output, paint_data, Colors.white, 190, 330, 40, 50, 'White')
+    red_b = ColorButton(output, paint_data, Colors.red, 50, 330, 20, 25, 'Red')
+    cred_b = ColorButton(output, paint_data, Colors.coolred, 50, 350, 20, 25, 'Red')
+    yellow_b = ColorButton(output, paint_data, Colors.yellow, 70, 330, 20, 25, 'Yellow')
+    cyellow_b = ColorButton(output, paint_data, Colors.coolyellow, 70, 350, 20, 25, 'Yellow')
+    blue_b = ColorButton(output, paint_data, Colors.blue, 90, 330, 20, 25, 'Blue')
+    cblue_b = ColorButton(output, paint_data, Colors.coolblue, 90, 350, 20, 25, 'Blue')
+    green_b = ColorButton(output, paint_data, Colors.green, 110, 330, 20, 25, 'Green')
+    cgreen_b = ColorButton(output, paint_data, Colors.coolgreen, 110, 350, 20, 25, 'Green')
+    skin_b = ColorButton(output, paint_data, (255, 160, 122), 50, 370, 20, 25, 'Skin')
+    pink_b = ColorButton(output, paint_data, (255, 105, 180), 70, 370, 20, 25, 'Yellow')
+    brown_b = ColorButton(output, paint_data, (139, 69, 19), 90, 370, 20, 25, 'Blue')
+    grey_b = ColorButton(output, paint_data, (169, 169, 169), 110, 370, 20, 25, 'Green')
+
+    color_buttons = [black_b, white_b, red_b, cred_b,
+                     yellow_b, cyellow_b, blue_b, cblue_b,
+                     green_b, cgreen_b, skin_b, pink_b,
+                     brown_b, grey_b]
+
+    paint_loop(output, painting, buttons, color_buttons)
+
+    return
+
+
+if __name__ == '__main__':
+    main()
