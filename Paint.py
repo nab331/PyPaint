@@ -43,8 +43,8 @@ def paint_loop(output, painting, buttons, color_buttons):
         for button in buttons:
             button.display_button()
 
-        for button in color_buttons:
-            button.display_color()
+        for color_button in color_buttons:
+            color_button.display_color()
 
         # Update Function
         painting.perform_functions()

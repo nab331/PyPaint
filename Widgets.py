@@ -34,6 +34,8 @@ class Output:
         self.base.window.blit(self.menu_box, (self.base.toolbar_x, self.base.toolbar_y))
         self.base.window.blit(self.info_box, (self.base.infobox_x, self.base.infobox_y))
 
+        self.info_box.fill(self.bg_color)
+
     def set_alpha(self, rectangle, alpha_val=100):
         rectangle.set_alpha(alpha_val)
 
@@ -85,14 +87,13 @@ class Painting:  # THE OUTPUT
         self.blit_default()
 
         if self.selected is not None:
-            if self.selected.beingClicked:
-
+            if self.selected.being_clicked:
                 if self.selected.name == 'Brush Size +' and self.selected.name != 'Pencil':
-                    self.b_size += 0.1
+                    self.paint_data.b_size += 0.1
 
                 elif self.selected.name == 'Brush Size -' and self.selected.name != 'Pencil':
-                    if self.b_size > 0:
-                        self.b_size -= 0.1
+                    if self.paint_data.b_size > 0:
+                        self.paint_data.b_size -= 0.1
 
                 if self.selected.name == 'Lighten Brush':
                     if self.paint_data.b_darkness < 200:
@@ -109,15 +110,15 @@ class Painting:  # THE OUTPUT
                     self.paint_data.b_size = 2
 
                 if self.selected.name == 'Brush':
-                    self.color = Colors.red
-                    self.b_size = 10
+                    self.paint_data.color = Colors.red
+                    self.paint_data.b_size = 10
 
                 elif self.selected.name == 'Eraser':
                     self.paint_data.color = self.output.canvas_color
 
                 elif self.selected.name == 'Clear':
-                    self.b_size = 10
-                    self.output.blitBackground()
+                    self.paint_data.b_size = 10
+                    self.output.blit_background()
                     self.draw_list = []
 
     def blit_default(self):  # Blitting stuff like brushsize
@@ -157,10 +158,10 @@ class Painting:  # THE OUTPUT
 
 
 class MyButton:
-    def __init__(self, output, paint_data, image, x, y, size, grow, name='NONE', detail='Description',
+    def __init__(self, output, painting, image, x, y, size, grow, name='NONE', detail='Description',
                  color=Colors.coolblue, function=None):
         self.output = output
-        self.paint_data = paint_data
+        self.painting = painting
 
         self.file = pygame.image.load(image)
         self.size = size
@@ -177,29 +178,32 @@ class MyButton:
         self.rect.y = y
 
         self.function = function
-        self.beingClicked = False
+        self.being_clicked = False
+
+        self.mouse = None
+        self.clicked = None
 
     def display_button(self):
         self.mouse = pygame.mouse.get_pos()
         self.clicked = pygame.mouse.get_pressed()
 
-        if self.rect.x < self.mouse[0] < self.rect.x + self.size and self.rect.y < self.mouse[
-            1] < self.rect.y + self.size:
-
+        if self.rect.x < self.mouse[0] < self.rect.x + self.size \
+                and self.rect.y < self.mouse[1] < self.rect.y + self.size:
             self.image = pygame.transform.scale(self.file, (self.grow, self.grow))
             self.output.base.window.blit(self.image,
                                          (self.rect.x - (self.grow - self.size) * 0.5,
                                           self.rect.y - (self.grow - self.size) * 0.5))
 
-            message_to_screen(self.output.base.window, self.name, self.color, 30, 733, 30, True)  # The Title
+            message_to_screen(self.output.info_box, self.name, self.color,
+                              0, 0.25 * self.output.base.infobox_h, 30, True)
 
             self.output.set_alpha(self.output.info_box, 200)  # MAKES THE INFO BOX DARKER
 
             if self.clicked == (1, 0, 0):
-                self.paint_data.selected = self
-                self.beingClicked = True
+                self.painting.selected = self
+                self.being_clicked = True
             else:
-                self.beingClicked = False
+                self.being_clicked = False
 
         else:
             self.image = pygame.transform.scale(self.file, (self.size, self.size))  # Change image to the original size
@@ -209,9 +213,9 @@ class MyButton:
 
 
 class ColorButton:  # Buttons
-    def __init__(self, output, paint_data, color, x, y, size, grow, name):
+    def __init__(self, output, painting, color, x, y, size, grow, name):
         self.output = output
-        self.paint_data = paint_data
+        self.painting = painting
 
         self.size = size
         self.grow = grow
@@ -225,7 +229,7 @@ class ColorButton:  # Buttons
         self.rect.x = x
         self.rect.y = y
 
-        self.beingClicked = False
+        self.being_clicked = False
 
         self.mouse = None
         self.clicked = None
@@ -234,27 +238,28 @@ class ColorButton:  # Buttons
         self.mouse = pygame.mouse.get_pos()
         self.clicked = pygame.mouse.get_pressed()
 
-        if self.rect.x < self.mouse[0] < self.rect.x + self.size and self.rect.y < self.mouse[
-            1] < self.rect.y + self.size:
-
+        if self.rect.x < self.mouse[0] < self.rect.x + self.size \
+                and self.rect.y < self.mouse[1] < self.rect.y + self.size:
             self.box = pygame.Surface((self.grow, self.grow))
             self.box.fill(self.color)
 
             self.output.base.window.blit(self.box,
                                          (self.rect.x - (self.grow - self.size) * 0.5,
                                           self.rect.y - (self.grow - self.size) * 0.5))
-            message_to_screen(self.output.base.window, self.name, self.color, 30, 733, 30, True)  # The Title
+
+            message_to_screen(self.output.info_box, self.name, self.color,
+                              0, 0.25 * self.output.base.infobox_h, 30, True)
 
             if self.clicked == (1, 0, 0):
-                self.paint_data.prime_color = self.color
-                self.paint_data.b_darkness = 0
+                self.painting.paint_data.prime_color = self.color
+                self.painting.paint_data.b_darkness = 0
 
-                self.paint_data.set_color()
+                self.painting.paint_data.set_color()
 
-                self.beingClicked = True
+                self.being_clicked = True
 
             else:
-                self.beingClicked = False
+                self.being_clicked = False
 
         else:
             self.box = pygame.Surface((self.size, self.size))  # Change image to the original size
