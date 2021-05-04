@@ -8,8 +8,13 @@ class Output:
         self.tool_space = tool_space
         self.canvas_color = canvas_color
 
-        self.canvas = pygame.Surface((self.base.canvas_w, self.base.canvas_h))
-        self.canvas.fill(self.canvas_color)
+        self.paint_canvas = pygame.Surface((self.base.canvas_w, self.base.canvas_h))
+        self.paint_canvas.fill(self.canvas_color)
+
+        self.bg_canvas = pygame.Surface((self.base.canvas_w, self.base.canvas_h))
+        self.bg_canvas.fill(self.canvas_color)
+        self.set_alpha(self.bg_canvas, 80)
+        self.bg_canvas_img = None
 
         self.menu_box = pygame.Surface((self.base.toolbar_w, self.base.toolbar_h))  # menuBox
         self.set_alpha(self.menu_box, 80)
@@ -26,11 +31,35 @@ class Output:
         return
 
     def blit_canvas(self):
-        self.base.window.blit(self.canvas, (self.base.canvas_x, self.base.canvas_y))
+        self.blit_paint_canvas()
+        self.blit_bg_canvas()
         return
 
     def clear_canvas(self):
-        self.canvas.fill(self.canvas_color)
+        self.clear_paint_canvas()
+        self.clear_bg_canvas()
+        return
+
+    def blit_paint_canvas(self):
+        self.base.window.blit(self.paint_canvas, (self.base.canvas_x, self.base.canvas_y))
+        return
+
+    def clear_paint_canvas(self):
+        self.paint_canvas.fill(self.canvas_color)
+        return
+
+    def blit_bg_canvas(self):
+        if self.bg_canvas_img is not None:
+            self.bg_canvas.blit(self.bg_canvas_img, (0, 0))
+        self.base.window.blit(self.bg_canvas, (self.base.canvas_x, self.base.canvas_y))
+        return
+
+    def clear_bg_canvas(self):
+        self.bg_canvas.fill(self.canvas_color)
+        return
+
+    def set_bg_canvas(self, img):
+        self.bg_canvas_img = pygame.transform.scale(img, (self.base.canvas_w, self.base.canvas_h))
         return
 
     def blit_background(self):
@@ -58,7 +87,7 @@ class PaintData:
         self.b_size = 10
         self.b_darkness = 0
 
-        self.prime_color = Colors.red
+        self.prime_color = Colors.water
         self.color = None
         self.set_color()
         return
@@ -144,12 +173,12 @@ class Painting:  # THE OUTPUT
                         self.paint_data.b_darkness -= 1
                         self.paint_data.set_color()
 
-                elif self.selected.name == 'Pencil':
-                    self.paint_data.color = Colors.silver
+                if self.selected.name == 'Pencil':
+                    self.paint_data.color = Colors.road_0
                     self.paint_data.b_size = 2
 
-                if self.selected.name == 'Brush':
-                    self.paint_data.color = Colors.red
+                elif self.selected.name == 'Brush':
+                    self.paint_data.color = Colors.water
                     self.paint_data.b_size = 10
 
                 elif self.selected.name == 'Eraser':
@@ -178,13 +207,13 @@ class Painting:  # THE OUTPUT
         for point in points:
             cood = point[0]
             canvas_cood = (cood[0] - self.output.base.canvas_x, cood[1] - self.output.base.canvas_y)
-            pygame.draw.circle(self.output.canvas, self.paint_data.color, canvas_cood, int(self.paint_data.b_size))
+            pygame.draw.circle(self.output.paint_canvas, self.paint_data.color, canvas_cood, int(self.paint_data.b_size))
         self.output.blit_canvas()
         return
 
     def blit(self, cood):
         canvas_cood = (cood[0] - self.output.base.canvas_x, cood[1] - self.output.base.canvas_y)
-        pygame.draw.circle(self.output.canvas, self.paint_data.color, canvas_cood, int(self.paint_data.b_size))
+        pygame.draw.circle(self.output.paint_canvas, self.paint_data.color, canvas_cood, int(self.paint_data.b_size))
         self.output.blit_canvas()
         return
 
@@ -197,9 +226,13 @@ class Painting:  # THE OUTPUT
         for point in self.draw_list:
             mouse_pos = point[0]
             canvas_cood = (mouse_pos[0] - self.output.base.canvas_x, mouse_pos[1] - self.output.base.canvas_y)
-            pygame.draw.circle(self.output.canvas, point[1], canvas_cood, point[2])
+            pygame.draw.circle(self.output.paint_canvas, point[1], canvas_cood, point[2])
 
         self.output.blit_canvas()
+        return
+
+    def clear(self):
+        self.draw_list = []
         return
 
     def clean_list(self):
@@ -237,6 +270,7 @@ class MyButton:
 
         self.function = function
         self.being_clicked = False
+        self.hovering = False
 
         self.mouse = None
         self.clicked = None
@@ -258,13 +292,18 @@ class MyButton:
 
             self.output.set_alpha(self.output.info_box, 200)  # MAKES THE INFO BOX DARKER
 
-            if self.clicked == (1, 0, 0):
+            if self.clicked != (1, 0, 0):
+                self.hovering = True
+                self.being_clicked = False
+            elif self.clicked == (1, 0, 0) and self.hovering:
                 self.painting.selected = self
                 self.being_clicked = True
             else:
                 self.being_clicked = False
 
         else:
+            self.hovering = False
+
             self.image = pygame.transform.scale(self.file, (self.size, self.size))  # Change image to the original size
             self.output.base.window.blit(self.image, (self.rect.x, self.rect.y))  # Display the icon
 
@@ -290,6 +329,7 @@ class ColorButton:  # Buttons
         self.rect.y = y
 
         self.being_clicked = False
+        self.hovering = False
 
         self.mouse = None
         self.clicked = None
@@ -311,18 +351,22 @@ class ColorButton:  # Buttons
             message_to_screen(self.output.info_box, self.name, self.color,
                               0, 0.25 * self.output.base.infobox_h, 30, True)
 
-            if self.clicked == (1, 0, 0):
+            if self.clicked != (1, 0, 0):
+                self.hovering = True
+                self.being_clicked = False
+            elif self.clicked == (1, 0, 0) and self.hovering:
                 self.painting.paint_data.prime_color = self.color
                 self.painting.paint_data.b_darkness = 0
 
                 self.painting.paint_data.set_color()
 
                 self.being_clicked = True
-
             else:
                 self.being_clicked = False
 
         else:
+            self.hovering = False
+
             self.box = pygame.Surface((self.size, self.size))  # Change image to the original size
             self.box.fill(self.color)
 

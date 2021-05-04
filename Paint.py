@@ -12,8 +12,27 @@ def display_list(output, painting):
     return
 
 
-def paint_loop(output, painting, buttons, color_buttons):
+def show_cur_canvas(output, painting, file_system):
+    img = file_system.get_cur()
+    if img is not None:
+        painting.clear()
+        output.set_bg_canvas(img)
+        output.blit_background()
+    return
+
+
+def show_next_canvas(output, painting, file_system):
+    img = file_system.get_next()
+    if img is not None:
+        painting.clear()
+        output.set_bg_canvas(img)
+        output.blit_background()
+    return
+
+
+def paint_loop(output, painting, file_system, buttons, color_buttons):
     output.blit_background()
+    show_cur_canvas(output, painting, file_system)
 
     while True:
         for event in pygame.event.get():
@@ -35,6 +54,10 @@ def paint_loop(output, painting, buttons, color_buttons):
 
                 if event.key == pygame.K_BACKSPACE:
                     painting.undo_mode = False
+
+                if event.key == pygame.K_s:
+                    file_system.save_img(output.paint_canvas)
+                    show_next_canvas(output, painting, file_system)
 
         # Draw Everything
         output.blit_menu()

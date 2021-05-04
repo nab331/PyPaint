@@ -21,7 +21,7 @@ def mouse_pos_distance(vec_a, vec_b):
 
 def forward_a_step(vec_a, vec_b, v_size):
     vec_diff = [vec_b[0] - vec_a[0], vec_b[1] - vec_a[1]]
-    vec_diff_m = math.sqrt(math.pow(vec_diff[0], 2) + math.pow(vec_diff[1], 2))
+    vec_diff_m = math.sqrt(math.pow(vec_diff[0], 2) + math.pow(vec_diff[1], 2)) + 1e-20
     vec_diff_n = [vec_diff[0] / vec_diff_m, vec_diff[1] / vec_diff_m]
     ret = [vec_a[0] + vec_diff_n[0] * v_size, vec_a[1] + vec_diff_n[1] * v_size]
     return ret

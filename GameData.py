@@ -9,7 +9,7 @@ class BaseGame:
         pygame.init()
 
         # Window
-        self.window_width = 900
+        self.window_width = 960
         self.window_height = 700
         self.window_size = (self.window_width, self.window_height)
         self.window = pygame.display.set_mode(self.window_size)  # pygame.NOFRAME

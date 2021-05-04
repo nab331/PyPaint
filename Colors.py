@@ -29,6 +29,12 @@ class Colors:
     brown = (139, 69, 19)
     yellow = (255, 255, 0)
 
+    water = (178, 206, 254)
+    mountain = (244, 244, 244)
+
+    road_0 = (255, 255, 255)
+    road_1 = (255, 240, 187)
+
     def __init__(self):
         return
 
