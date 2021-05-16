@@ -84,7 +84,7 @@ class Output:
 
 class PaintData:
     def __init__(self):
-        self.b_size = 10
+        self.b_size = 15
         self.b_darkness = 0
 
         self.prime_color = Colors.water
@@ -173,22 +173,19 @@ class Painting:  # THE OUTPUT
                         self.paint_data.b_darkness -= 1
                         self.paint_data.set_color()
 
-                if self.selected.name == 'Pencil':
-                    self.paint_data.color = Colors.road_0
-                    self.paint_data.b_size = 2
-
-                elif self.selected.name == 'Brush':
-                    self.paint_data.color = Colors.water
-                    self.paint_data.b_size = 10
-
-                elif self.selected.name == 'Eraser':
+                if self.selected.name == 'Eraser':
                     self.paint_data.color = self.output.canvas_color
+                    self.paint_data.b_size = 10
 
                 elif self.selected.name == 'Clear':
                     self.paint_data.b_size = 10
                     self.output.clear_canvas()
                     self.output.blit_canvas()
                     self.draw_list = []
+
+                if self.selected.button_data.b_type == 'normal_button':
+                    self.paint_data.color = self.selected.button_data.color
+                    self.paint_data.b_size = self.selected.button_data.b_size
         return
 
     def blit_default(self):  # Blitting stuff like brushsize
@@ -248,11 +245,20 @@ class Painting:  # THE OUTPUT
         return
 
 
+class ButtonData:
+    def __init__(self, b_type, b_size, color):
+        self.b_type = b_type
+        self.b_size = b_size
+        self.color = color
+        return
+
+
 class MyButton:
-    def __init__(self, output, painting, image, x, y, size, grow, name='NONE', detail='Description',
+    def __init__(self, output, painting, image, x, y, size, grow, button_data, name='NONE', detail='Description',
                  color=Colors.coolblue, function=None):
         self.output = output
         self.painting = painting
+        self.button_data = button_data
 
         self.file = pygame.image.load(image)
         self.size = size
@@ -288,7 +294,7 @@ class MyButton:
                                           self.rect.y - (self.grow - self.size) * 0.5))
 
             message_to_screen(self.output.info_box, self.name, self.color,
-                              0, 0.25 * self.output.base.infobox_h, 30, True)
+                              0, 0.25 * self.output.base.infobox_h, 20, True)
 
             self.output.set_alpha(self.output.info_box, 200)  # MAKES THE INFO BOX DARKER
 
@@ -312,9 +318,10 @@ class MyButton:
 
 
 class ColorButton:  # Buttons
-    def __init__(self, output, painting, color, x, y, size, grow, name):
+    def __init__(self, output, painting, color, x, y, size, grow, button_data, name):
         self.output = output
         self.painting = painting
+        self.button_data = button_data
 
         self.size = size
         self.grow = grow
@@ -349,7 +356,7 @@ class ColorButton:  # Buttons
                                           self.rect.y - (self.grow - self.size) * 0.5))
 
             message_to_screen(self.output.info_box, self.name, self.color,
-                              0, 0.25 * self.output.base.infobox_h, 30, True)
+                              0, 0.25 * self.output.base.infobox_h, 20, True)
 
             if self.clicked != (1, 0, 0):
                 self.hovering = True

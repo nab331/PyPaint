@@ -3,14 +3,15 @@ import pygame
 
 
 class FileSystem:
-    def __init__(self, start_name, input_dir, output_dir, blank=False):
+    def __init__(self, start_name, input_dir, output_dir, output_name, blank=False):
         self.start_name = start_name
         self.input_dir = input_dir
         self.output_dir = output_dir
+        self.output_name = output_name
         self.blank = blank
 
         if self.blank:
-            self.file_names = ['output.png']
+            self.file_names = [self.output_name]
             self.idx = 0
             self.cur_img = None
         else:

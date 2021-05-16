@@ -1,5 +1,3 @@
-
-
 class Colors:
     coolgrey = (52, 73, 94)
     pick = (103, 128, 159)
@@ -29,11 +27,16 @@ class Colors:
     brown = (139, 69, 19)
     yellow = (255, 255, 0)
 
-    water = (178, 206, 254)
     mountain = (244, 244, 244)
+    water = (178, 206, 254)
+    neighborhood = (210, 232, 245)
+    culture = (255, 130, 130)
+    vegetation = (180, 235, 175)
 
     road_0 = (255, 255, 255)
     road_1 = (255, 240, 187)
+    road_2 = (255, 172, 77)
+    road_3 = (227, 227, 227)
 
     def __init__(self):
         return
